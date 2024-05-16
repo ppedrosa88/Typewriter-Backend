@@ -4,10 +4,11 @@ const { createUser, getAllUsers, loginUser, deleteUser, updateUser, getUser, ref
 const authRouter = express.Router();
 
 authRouter.get('/', getAllUsers);
-authRouter.post('/', createUser);
 authRouter.get('/:id', getUser);
-authRouter.delete('/:id', deleteUser);
+authRouter.post('/', createUser);
 authRouter.patch('/:id', updateUser);
+authRouter.delete('/:id', deleteUser);
+
 authRouter.post('/login', loginUser);
 authRouter.post('/refresh', refreshToken);
 

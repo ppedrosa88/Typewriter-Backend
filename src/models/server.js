@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dbConnection = require('../db/db');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+
 
 class Server {
     constructor() {
@@ -10,7 +13,9 @@ class Server {
 
         this.paths = {
             auth: '/api/auth',
-            blog: '/api/blog'
+            blog: '/api/blogs',
+            automation: '/api/automation',
+            schedule: '/api/schedule'
         }
 
         this.connectDB();
@@ -28,15 +33,20 @@ class Server {
     }
 
     middlewares() {
+        this.app.use(logger('dev'));
         this.app.use(cors());
         this.app.use(express.json());
         this.app.use(express.text());
-        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(cookieParser())
+
+        // this.app.use(express.urlencoded({ extended: true }));
     }
 
     routes() {
         this.app.use(this.paths.auth, require('../routes/authRouter'))
         this.app.use(this.paths.blog, require('../routes/blogRouter'))
+        this.app.use(this.paths.automation, require('../routes/automationRouter'))
+        this.app.use(this.paths.schedule, require('../routes/scheduleRouter'))
     }
 
     listen() {

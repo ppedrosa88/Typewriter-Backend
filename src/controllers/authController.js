@@ -101,7 +101,7 @@ const loginUser = async (req, res) => {
         if (!user) return res.status(404).send({ ok: false, status: 404, msg: 'Email or password incorrect' });
         if (user.status === false) return res.status(404).send({ ok: false, status: 404, msg: 'Error. Can not login user' });
 
-        const token = jwt.sign({ page: "typewriter", id: user.id, email: user.email }, process.env.SECRET_JWT, { expiresIn: '20min' });
+        const token = jwt.sign({ page: "typewriter", id: user.id, email: user.email }, process.env.SECRET_JWT, { expiresIn: '24h' });
         const refreshToken = jwt.sign({ page: "typewriter", id: user.id, email: user.email }, process.env.SECRET_JWT, { expiresIn: '2h' });
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'none' });
         return res.send({ ok: true, status: 200, data: { ok: true, accessToken: token, refreshToken } });

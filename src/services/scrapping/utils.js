@@ -26,17 +26,22 @@ async function formatContent(content) {
 
     const paragraphs = [];
 
-    $('p').each((index, element) => {
+    $('p, h1, h2, h3, h4, h5, h6').each((index, element) => {
+        const $element = $(element);
+        const tag = $element.prop("tagName").toLowerCase();
         const paragraphsText = extractTextWithTags($(element).html());
-        paragraphs.push({ tag: 'p', text: paragraphsText });
+        paragraphs.push({ tag, text: paragraphsText });
     });
 
     return paragraphs;
 }
 
+
+
 function extractTextWithTags(html) {
     const $ = cheerio.load(html);
     const texto = [];
+    // console.log(html)
 
     function extractText(element) {
         $(element).contents().each((index, el) => {
@@ -53,4 +58,48 @@ function extractTextWithTags(html) {
     return texto.join(' ');
 }
 
-module.exports = { scraping, formatContent };
+async function allLinksTags(url) {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    try {
+        await page.goto(url)
+        const html = await page.content();
+
+        const $ = cheerio.load(html);
+
+        const links = [];
+
+        $('a').each((index, element) => {
+            const href = $(element).attr('href');
+            if (href && href.startsWith('https://')) {
+                links.push({ tag: 'a', href });
+            }
+        });
+        console.log(links)
+        return links;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+const url = 'https://www.viajeroscallejeros.com/';
+
+const runScraping = async () => {
+    const content = await scraping(url);
+    // console.log('content', content);
+    const linkds = await allLinksTags(content);
+    // console.log('linkds', linkds);
+};
+
+// runScraping()
+//     .then(() => {
+//         console.log('Scraping completed.');
+//     })
+//     .catch(error => {
+//         console.error('An error occurred during scraping:', error);
+//     });
+
+
+module.exports = { scraping, formatContent, allLinksTags };
