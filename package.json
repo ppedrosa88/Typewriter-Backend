@@ -26,6 +26,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.9.7",
     "puppeteer": "22.7.1",
-    "sequelize": "6.37.3"
+    "sequelize": "6.37.3",
+    "uuid": "^9.0.1"
   }
 }

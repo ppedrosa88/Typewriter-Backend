@@ -4,6 +4,7 @@ const { scraping, formatContent } = require("../services/scrapping/utils");
 const jwt = require('jsonwebtoken');
 const { prompts, typeOfPrompt } = require("../services/ia/prompt");
 const { generatePostWithAI } = require("../services/ia/workerAi");
+const { isColString } = require("sequelize/lib/utils");
 
 let generate;
 import("../services/ia/cohere.mjs").then(module => {
@@ -35,7 +36,6 @@ const getBlogs = async (req, res) => {
         if (!user || user.status === false || user.id !== id) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
         const blogs = await Blog.findAndCountAll();
-        console.log(blogs)
         return res.send({ ok: true, status: 200, data: blogs });
 
     } catch (error) {
@@ -120,10 +120,8 @@ const updateBlog = async (req, res) => {
 
         const user = await User.findByPk(userId);
 
-        console.log(user)
         if (!user || user.status === false || user.id !== userId) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
-        console.log('blog')
         const blog = await Blog.findByPk(id);
         await blog.update({ title, reference, content, category, status });
         await blog.save();
@@ -167,6 +165,39 @@ const deleteBlog = async (req, res) => {
     }
 }
 
+const totallyDeleteBlog = async (req, res) => {
+
+    const { authorization } = req.headers;
+    const { id } = req.params;
+
+    const accessToken = authorization.split(' ')[1];
+
+    if (!accessToken) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
+
+    if (!id) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
+
+    try {
+        const { id: userId } = jwt.verify(accessToken, process.env.SECRET_JWT);
+
+        const user = await User.findByPk(userId);
+
+        if (!user || user.status === false || user.id !== userId) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
+
+        const blog = await Blog.findByPk(id);
+
+        if (!blog) return res.status(404).send({ ok: false, status: 404, msg: 'Blog not found' });
+
+
+        if (blog.status === 'deleted') {
+            await blog.update({ status: 'inactive' });
+            return res.send({ ok: true, status: 200, data: blog, msg: 'Blog deleted' });
+        }
+
+    } catch (error) {
+        return res.status(500).send({ ok: false, status: 500, msg: error });
+
+    }
+}
 
 const iaBlog = async (req, res) => {
     const { url, category } = req.body;
@@ -178,18 +209,15 @@ const iaBlog = async (req, res) => {
 
     if (!url) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
     if (!category) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
-
     try {
         const data = await scraping(url);
-        const { url: reference, title, image, content } = data;
-
+        const { url: reference, title, content } = data;
         const formattedContent = await formatContent(content);
 
         const iaTitle = await generateTitle({ prompt: title })
         const iaGeneratedContent = formattedContent;
 
         const type = typeOfPrompt(category)
-
         if (!type) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
 
         for (let i = 0; i < formattedContent.length; i++) {
@@ -212,5 +240,5 @@ const iaBlog = async (req, res) => {
     }
 }
 
-module.exports = { getBlogs, getBlogById, iaBlog, postBlog, updateBlog, deleteBlog }
+module.exports = { getBlogs, getBlogById, iaBlog, postBlog, updateBlog, deleteBlog, totallyDeleteBlog }
 

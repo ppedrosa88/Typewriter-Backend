@@ -31,8 +31,24 @@ const createUser = async (req, res) => {
 }
 const getUser = async (req, res) => {
     const { id } = req.params;
+    if (!id) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
+
+    const { authorization } = req.headers;
+    if (!authorization) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
+
+    const accessToken = authorization.split(' ')[1];
+
+    if (!accessToken) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
+    console.log('first')
 
     try {
+
+        const { id: userId } = jwt.verify(accessToken, process.env.SECRET_JWT);
+        console.log(userId)
+        console.log(id)
+
+
+        if (userId !== Number(id)) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
         const user = await User.findByPk(id);
         if (!user) return res.status(404).send({ ok: false, status: 404, msg: `User with id ${id} not found` });
 

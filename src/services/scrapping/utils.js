@@ -41,7 +41,6 @@ async function formatContent(content) {
 function extractTextWithTags(html) {
     const $ = cheerio.load(html);
     const texto = [];
-    // console.log(html)
 
     function extractText(element) {
         $(element).contents().each((index, el) => {
@@ -76,30 +75,17 @@ async function allLinksTags(url) {
                 links.push({ tag: 'a', href });
             }
         });
-        console.log(links)
         return links;
     } catch (error) {
         console.error(error);
     }
 }
 
-
 const url = 'https://www.viajeroscallejeros.com/';
 
 const runScraping = async () => {
     const content = await scraping(url);
-    // console.log('content', content);
     const linkds = await allLinksTags(content);
-    // console.log('linkds', linkds);
 };
-
-// runScraping()
-//     .then(() => {
-//         console.log('Scraping completed.');
-//     })
-//     .catch(error => {
-//         console.error('An error occurred during scraping:', error);
-//     });
-
 
 module.exports = { scraping, formatContent, allLinksTags };

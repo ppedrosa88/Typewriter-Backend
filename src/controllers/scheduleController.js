@@ -76,7 +76,6 @@ const createSchedule = async (req, res) => {
 
         if (!user || user.status === false || user.id !== userId) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
-        console.log(scheduledTime)
         const blog = await Blog.findByPk(blogId);
 
         if (!blog) return res.status(404).send({ ok: false, status: 404, msg: 'Blog not found' });
@@ -84,9 +83,6 @@ const createSchedule = async (req, res) => {
         if (blog.status === 'deleted') return res.status(400).send({ ok: false, status: 400, msg: 'Blog already deleted' });
 
         const schedule = await Schedule.create({ blogId, userId, scheduledTime: date });
-
-        console.log(schedule)
-
 
         return res.send({ ok: true, status: 200, data: schedule, msg: 'Blog scheduled' });
 
@@ -108,7 +104,6 @@ const updateSchedule = async (req, res) => {
     if (!id) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
 
     if (!status && !scheduledTime) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
-    console.log(scheduledTime)
 
     try {
 

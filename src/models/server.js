@@ -15,7 +15,9 @@ class Server {
             auth: '/api/auth',
             blog: '/api/blogs',
             automation: '/api/automation',
-            schedule: '/api/schedule'
+            schedule: '/api/schedule',
+            apiKey: '/api/apiKey',
+            usersAPI: '/api'
         }
 
         this.connectDB();
@@ -47,6 +49,8 @@ class Server {
         this.app.use(this.paths.blog, require('../routes/blogRouter'))
         this.app.use(this.paths.automation, require('../routes/automationRouter'))
         this.app.use(this.paths.schedule, require('../routes/scheduleRouter'))
+        this.app.use(this.paths.apiKey, require('../routes/apiKeyRouter'))
+        this.app.use(this.paths.usersAPI, require('../routes/usersAPIRouter'))
     }
 
     listen() {

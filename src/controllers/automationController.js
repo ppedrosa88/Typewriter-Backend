@@ -31,7 +31,6 @@ const getAutomationsById = async (req, res) => {
     const { authorization } = req.headers;
 
     const accessToken = authorization.split(' ')[1];
-    console.log(accessToken)
     if (!accessToken) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
     const { id } = req.params;
@@ -127,20 +126,6 @@ const updateAutomation = async (req, res) => {
         await automation.save();
         return res.send({ ok: true, status: 200, msg: 'Automation updated', data: automation });
 
-        // if (status && (status === 'inactive' || status === 'active')) {
-        //     await automation.update({ status });
-        //     return res.send({ ok: true, status: 200, msg: 'Automation status changed' });
-        // }
-
-        // if (review_time) {
-        //     await automation.update({ review_time });
-        //     return res.send({ ok: true, status: 200, msg: 'Automation review time changed' });
-        // }
-        // if(contentType) {
-        //     await automation.update({ contentType });
-        //     return res.send({ ok: true, status: 200, msg: 'Automation content type changed' });
-        // }
-
     } catch (error) {
         return res.status(500).send({ ok: false, status: 500, msg: error });
     }
@@ -154,22 +139,18 @@ const deleteAutomation = async (req, res) => {
     if (!accessToken) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
     const { id } = req.params;
-    console.log(id)
 
     if (!id) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
 
     try {
         const { id: userId } = jwt.verify(accessToken, process.env.SECRET_JWT);
-        console.log(userId)
 
         const user = await User.findByPk(userId);
 
-        console.log(user)
         if (!user || user.status === false || user.id !== userId) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
         const automation = await Automation.findByPk(id);
 
-        console.log(automation)
         if (!automation) return res.status(404).send({ ok: false, status: 404, msg: 'Automation not found' });
 
         await automation.destroy();

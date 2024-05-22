@@ -52,6 +52,5 @@ const generatePostWithAI = async ({ prompt, typeContent }) => {
     }
 }
 
-generatePostWithAI("")
 
 module.exports = { generatePostWithAI }
