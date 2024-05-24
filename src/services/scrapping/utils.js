@@ -1,6 +1,5 @@
 const cheerio = require('cheerio');
 const puppeteer = require('puppeteer');
-const fs = require('fs').promises;
 
 async function scraping(url) {
     const browser = await puppeteer.launch();
@@ -80,8 +79,6 @@ async function allLinksTags(url) {
         console.error(error);
     }
 }
-
-const url = 'https://www.viajeroscallejeros.com/';
 
 const runScraping = async () => {
     const content = await scraping(url);

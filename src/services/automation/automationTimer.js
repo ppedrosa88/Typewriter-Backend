@@ -50,15 +50,16 @@ const automationTimeChecker = async () => {
 
                 await automation.save();
 
-                for (let link of newLinks) {
-                    const { href } = link;
+                for (let i = 0; i < 3; i++) {
+                    const { href } = newLinks[i];
                     await scrappinNewPost(href, automation.userId, automation.contentType);
                 }
-
-                automation.last_review_date = currentDate;
-                await automation.save();
             }
+
+            automation.last_review_date = currentDate;
+            await automation.save();
         }
+
     } catch (error) {
         console.error(error);
     }

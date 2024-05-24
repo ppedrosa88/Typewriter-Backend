@@ -35,7 +35,7 @@ const getBlogs = async (req, res) => {
 
         if (!user || user.status === false || user.id !== id) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
 
-        const blogs = await Blog.findAndCountAll();
+        const blogs = await Blog.findAndCountAll({ where: { userId: id } });
         return res.send({ ok: true, status: 200, data: blogs });
 
     } catch (error) {
@@ -203,6 +203,7 @@ const iaBlog = async (req, res) => {
     const { url, category } = req.body;
     const { authorization } = req.headers;
 
+    console.log({ url, category })
     const accessToken = authorization.split(' ')[1];
 
     if (!accessToken) return res.status(401).send({ ok: false, status: 401, msg: 'Unauthorized' });
@@ -214,17 +215,22 @@ const iaBlog = async (req, res) => {
         const { url: reference, title, content } = data;
         const formattedContent = await formatContent(content);
 
-        const iaTitle = await generateTitle({ prompt: title })
+        const iaTitle = await generateTitle(title)
         const iaGeneratedContent = formattedContent;
 
         const type = typeOfPrompt(category)
         if (!type) return res.status(400).send({ ok: false, status: 400, msg: 'Missing data' });
+        let iaData;
 
-        for (let i = 0; i < formattedContent.length; i++) {
-            if (formattedContent[i].tag === 'p') {
-                const iaData = await generatePostWithAI({ prompt: formattedContent[i].text, typeContent: category })
-                iaGeneratedContent[i].iaData = iaData
+        if (category === 'news' || category === 'blog' || category === 'facebook' || category === 'linkedIn') {
+            for (let i = 0; i < formattedContent.length; i++) {
+                if (formattedContent[i].tag === 'p') {
+                    iaData = await generatePostWithAI({ prompt: formattedContent[i].text, typeContent: category })
+                    iaGeneratedContent[i].iaData = iaData
+                }
             }
+        } else if (category === 'twitter') {
+            iaGeneratedContent[0].iaData = await generatePostWithAI({ prompt: formattedContent[0].text, typeContent: category })
         }
 
         const { id } = jwt.verify(accessToken, process.env.SECRET_JWT);
